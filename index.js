@@ -35,6 +35,26 @@ async function run() {
       const services = await cursor.toArray();
       res.send(services);
     });
+
+    //available
+    app.get("/available", async (req, res) => {
+      const date = req.query.date;
+      const services = await servicesCollection.find().toArray();
+      const query = { date: date };
+      const bookings = await bookingCollection.find(query).toArray();
+      services.forEach((service) => {
+        const serviceBookings = bookings.filter(
+          (book) => book.treatment === service.name
+        );
+        const booked = serviceBookings.map((book) => book.slot);
+        const available = service.slots.filter(
+          (slot) => !booked.includes(slot)
+        );
+        service.slots = available;
+      });
+      res.send(services);
+    });
+
     //booking post api
     app.post("/booking", async (req, res) => {
       const booking = req.body;
