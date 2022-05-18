@@ -27,6 +27,7 @@ async function run() {
     const bookingCollection = client
       .db("doctors_protal")
       .collection("bookings");
+    const userCollection = client.db("doctors_protal").collection("users");
 
     ////service get api
     app.get("/service", async (req, res) => {
@@ -34,6 +35,18 @@ async function run() {
       const cursor = servicesCollection.find(query);
       const services = await cursor.toArray();
       res.send(services);
+    });
+
+    app.put("/user/:email", async (req, res) => {
+      const email = req.params.email;
+      const user = req.body;
+      const filter = { email: email };
+      const options = { upsert: true };
+      const updateDoc = {
+        $set: user,
+      };
+      const result = await userCollection.updateOne(filter, updateDoc, options);
+      res.send(result);
     });
 
     //available
