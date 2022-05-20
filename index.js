@@ -46,6 +46,9 @@ async function run() {
       .collection("bookings");
     const userCollection = client.db("doctors_protal").collection("users");
     const doctorCollection = client.db("doctors_protal").collection("doctors");
+    const paymentCollection = client
+      .db("doctors_protal")
+      .collection("payments");
 
     ///verifyAdmin
     const verifyAdmin = async (req, res, next) => {
@@ -125,6 +128,24 @@ async function run() {
         service.slots = available;
       });
       res.send(services);
+    });
+    /////
+    app.patch("/booking/:id", verifyJWT, async (req, res) => {
+      const id = req.params.id;
+      const payment = req.body;
+      const filter = { _id: ObjectId(id) };
+      const updateDoc = {
+        $set: {
+          paid: true,
+          transactionId: payment.transactionId,
+        },
+      };
+      const result = await paymentCollection.insertOne(payment);
+      const updateBooking = await bookingCollection.updateOne(
+        filter,
+        updateDoc
+      );
+      res.send(updateDoc);
     });
 
     app.get("/booking", verifyJWT, async (req, res) => {
