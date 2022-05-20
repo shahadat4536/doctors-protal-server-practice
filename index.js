@@ -1,5 +1,5 @@
 const express = require("express");
-const { MongoClient, ServerApiVersion } = require("mongodb");
+const { MongoClient, ServerApiVersion, ObjectId } = require("mongodb");
 const app = express();
 const cors = require("cors");
 require("dotenv").config();
@@ -125,6 +125,7 @@ async function run() {
       });
       res.send(services);
     });
+
     app.get("/booking", verifyJWT, async (req, res) => {
       const patient = req.query.patient;
       const decodedEmail = req.decoded.email;
@@ -135,6 +136,13 @@ async function run() {
       } else {
         return res.status(403).send({ message: "forbidden access" });
       }
+    });
+
+    app.get("/booking/:id", verifyJWT, async (req, res) => {
+      const id = req.params.id;
+      const query = { _id: ObjectId(id) };
+      const booking = await bookingCollection.findOne(query);
+      res.send(booking);
     });
     //booking post api
     app.post("/booking", async (req, res) => {
